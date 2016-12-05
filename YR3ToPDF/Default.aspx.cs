@@ -10,12 +10,15 @@ namespace YR3ToPDF {
   public partial class Default : System.Web.UI.Page {
     protected void Page_Load(object sender, EventArgs e) {
       if (Request.Files.Count == 1) {
-        var report = GeneratePDF(Request.Files[0].InputStream);
-
         Response.Clear();
-        Response.ContentType = "application/pdf";
-        Response.AddHeader("Content-Disposition", string.Format("inline; filename=\"{0}.pdf\"", report.Info.Title));
-        report.Publish(Response.OutputStream, FileFormat.PDF);
+
+        if (Request.Files[0].ContentLength != 0) {
+          var report = GeneratePDF(Request.Files[0].InputStream);
+          Response.ContentType = "application/pdf";
+          Response.AddHeader("Content-Disposition", string.Format("inline; filename=\"{0}.pdf\"", report.Info.Title));
+          report.Publish(Response.OutputStream, FileFormat.PDF);
+        }
+        Response.End();
 
       } else if (Request.Files.Count > 1) {
         Response.Clear();
@@ -40,6 +43,7 @@ namespace YR3ToPDF {
         }
 
         zip.Close();
+        Response.End();
       }
     }
 
