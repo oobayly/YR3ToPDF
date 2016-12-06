@@ -51,6 +51,10 @@ namespace YR3ToPDF {
 
     private Report GeneratePDF(System.IO.Stream stream) {
       var result = new Classes.S08File(stream);
+      Bitmap watermark = null;
+      if (checkWatermark.Checked) {
+        watermark = GetWatermark(result.Club);
+      }
 
       string data;
       stream.Position = 0;
@@ -112,7 +116,7 @@ namespace YR3ToPDF {
       Siberix.Report.Grid.IGrid grid = null;
       foreach (var line in lines) {
         if (grid == null) {
-          grid = AddGrid(section, content.Width);
+          grid = AddGrid(section, content.Width, watermark);
         }
 
         var row = AddLine(grid, style, line);
@@ -122,7 +126,7 @@ namespace YR3ToPDF {
           grid.Remove(row);
           section.AddPageBreak();
 
-          grid = AddGrid(section, content.Width);
+          grid = AddGrid(section, content.Width, watermark);
           AddLine(grid, style, line);
         }
       }
@@ -130,7 +134,22 @@ namespace YR3ToPDF {
       return report;
     }
 
-    private Siberix.Report.Grid.IGrid AddGrid(Siberix.Report.Section.ISection section, float width) {
+    private Bitmap GetWatermark(string club) {
+      switch (club) {
+        case "LOUGH DERG YACHT CLUB":
+          return new Bitmap(Server.MapPath("~/burgees/ldyc-watermark.png"));
+
+        default:
+          return null;
+      }
+    }
+
+    private Siberix.Report.Grid.IGrid AddGrid(Siberix.Report.Section.ISection section, float width, Bitmap watermark = null) {
+      if (watermark != null) {
+        var wm = section.AddWatermark();
+        wm.AddImage(new Siberix.Wrappers.GDIPlus.Image(watermark), 0, 0);
+      }
+
       var grid = section.AddGrid();
       grid.Width = new DirectWidth(width);
       var column = grid.AddColumn();
