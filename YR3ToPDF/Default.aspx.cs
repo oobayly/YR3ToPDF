@@ -50,7 +50,7 @@ namespace YR3ToPDF {
     }
 
     private Report GeneratePDF(System.IO.Stream stream) {
-      var result = new Classes.S08File(stream);
+      var result = new Classes.S08File(stream, true);
       Bitmap watermark = null;
       if (checkWatermark.Checked) {
         watermark = GetWatermark(result.Club);

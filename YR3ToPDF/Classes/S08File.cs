@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace YR3ToPDF.Classes {
   /// <summary>
+  /// Represents a YR3 results file.
   /// </summary>
   public class S08File {
     #region Properties
@@ -55,17 +56,34 @@ namespace YR3ToPDF.Classes {
     #endregion
 
     #region Constructors
+    /// <summary>
+    /// Creates an empty instance of the S08File class.
+    /// </summary>
     public S08File() {
+      Legend = new List<string>();
+      Results = new List<Result>();
     }
 
-    public S08File(FileInfo file) {
+    /// <summary>
+    /// Creates an instance of the S08File class from the specified file.
+    /// </summary>
+    /// <param name="file">The file containing the S08 data.</param>
+    /// <param name="headersOnly">A flag indicating whether only the header data is required.</param>
+    public S08File(FileInfo file, bool headersOnly = false)
+      : this() {
       using (var fs = file.OpenRead()) {
-        Import(fs);
+        Import(fs, headersOnly);
       }
     }
 
-    public S08File(Stream stream) {
-      Import(stream);
+    /// <summary>
+    /// Creates an instance of the S08File class from the specified file.
+    /// </summary>
+    /// <param name="stream">The stream containing the S08 data.</param>
+    /// <param name="headersOnly">A flag indicating whether only the header data is required.</param>
+    public S08File(Stream stream, bool headersOnly = false)
+      : this() {
+        Import(stream, headersOnly);
     }
     #endregion
 
@@ -95,7 +113,7 @@ namespace YR3ToPDF.Classes {
       return widths.ToArray();
     }
 
-    private void Import(Stream stream) {
+    private void Import(Stream stream, bool headersOnly) {
       using (var reader = new StreamReader(stream, System.Text.Encoding.ASCII, true, 8192, true)) {
         ParseHeader(reader.ReadLine());
         reader.ReadLine(); // Blank
@@ -108,6 +126,10 @@ namespace YR3ToPDF.Classes {
 
         ParseClass(reader.ReadLine());
         reader.ReadLine(); // Blank
+
+        // If only doing a simple parse, return here - less chance of a parse error occuring
+        if (headersOnly)
+          return;
 
         ParseRaces(reader.ReadLine());
         ParseDiscards(reader.ReadLine());
@@ -122,7 +144,6 @@ namespace YR3ToPDF.Classes {
         reader.ReadLine(); // 2nd line of race header
         var widths = GetColumnWidths(reader.ReadLine());
 
-        Results = new List<Result>();
         while (true) {
           var line = (reader.ReadLine() ?? "").Trim();
           if (line.Length == 0) {
@@ -132,7 +153,6 @@ namespace YR3ToPDF.Classes {
           }
         }
 
-        Legend = new List<string>();
         while (true) {
           var line = (reader.ReadLine() ?? "").Trim();
           if (line.Length == 0) {
