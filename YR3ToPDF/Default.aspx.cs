@@ -17,7 +17,7 @@ namespace YR3ToPDF {
         if (Request.Files[0].ContentLength != 0) {
           var report = GeneratePDF(Request.Files[0].InputStream);
           Response.ContentType = "application/pdf";
-          Response.AddHeader("Content-Disposition", string.Format("inline; filename=\"{0}.pdf\"", report.Info.Title));
+          Response.AddHeader("Content-Disposition", string.Format("inline; filename=\"{0:yyyy-MM-dd} - {1}.pdf\"", report.Info.Created, report.Info.Title));
           report.Publish(Response.OutputStream, FileFormat.PDF);
         }
         Response.End();
@@ -32,7 +32,7 @@ namespace YR3ToPDF {
 
         for (int i = 0; i < Request.Files.Count; i++) {
           var report = GeneratePDF(Request.Files[i].InputStream);
-          var entry = new ZipEntry(string.Format("{0}.pdf", report.Info.Title));
+          var entry = new ZipEntry(string.Format("{0:yyyy-MM-dd} - {1}.pdf", report.Info.Created, report.Info.Title));
           using (var ms = new System.IO.MemoryStream()) {
             report.Publish(ms, FileFormat.PDF);
             ms.Position = 0;
@@ -92,6 +92,7 @@ namespace YR3ToPDF {
       report.Info.Title = result.Name;
       report.Info.Author = result.Club;
       report.Info.Creator = "Siberix Report Writer";
+      report.Info.Created = result.Date;
       report.Info.Copyright = string.Format("{0:yyyy} {1}", result.Date, result.Club);
 
       var section = report.AddSection();
