@@ -1,7 +1,9 @@
 ﻿using ICSharpCode.SharpZipLib.Zip;
 using Siberix.Report;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -56,6 +58,23 @@ namespace YR3ToPDF {
         data = reader.ReadToEnd();
       }
 
+      var lines = new List<string>();
+      using (var reader = new System.IO.StringReader(data)) {
+        string line;
+        while ((line = reader.ReadLine()) != null) {
+          // Replace any control characters
+          line = line.Replace((char)0x0e, ' ');
+          line = line.Replace((char)0x14, ' ');
+
+          lines.Add(line);
+        }
+      }
+
+      // Remove any blank lines at the end
+      while (lines.Last().Trim() == "") {
+        lines.RemoveAt(lines.Count - 1);
+      }
+
       var font = new Font("Courier New", 12, FontStyle.Regular);
 
       SizeF size;
@@ -91,23 +110,20 @@ namespace YR3ToPDF {
       style.Brush = Siberix.Graphics.Brushes.Black;
 
       Siberix.Report.Grid.IGrid grid = null;
-      using (var reader = new System.IO.StringReader(data)) {
-        string line;
-        while ((line = reader.ReadLine()) != null) {
-          if (grid == null) {
-            grid = AddGrid(section, content.Width);
-          }
+      foreach (var line in lines) {
+        if (grid == null) {
+          grid = AddGrid(section, content.Width);
+        }
 
-          var row = AddLine(grid, style, line);
+        var row = AddLine(grid, style, line);
 
-          var measured = grid.Measure();
-          if (measured.Height > content.Height) {
-            grid.Remove(row);
-            section.AddPageBreak();
+        var measured = grid.Measure();
+        if (measured.Height > content.Height) {
+          grid.Remove(row);
+          section.AddPageBreak();
 
-            grid = section.AddGrid();
-            AddLine(grid, style, line);
-          }
+          grid = AddGrid(section, content.Width);
+          AddLine(grid, style, line);
         }
       }
 
