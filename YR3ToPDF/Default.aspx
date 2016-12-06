@@ -24,10 +24,11 @@
     .content > * {
       margin: 1ex;
       border-bottom: 1px solid #ccc;
+      padding-bottom: 1ex;
     }
-    .content > *:not(:last-child) {
-      margin-bottom: 0;
+    .content > *:last-child {
       border-bottom: 0;
+      padding-bottom: 0;
     }
 
     .content form {
