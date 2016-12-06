@@ -205,7 +205,7 @@ namespace YR3ToPDF.Classes {
       }
       result.Results = places.ToArray();
 
-      result.Place = int.Parse(line.Substring(start, widths[index]).Trim());
+      result.Place = line.Substring(start, widths[index]).Trim();
       start += widths[index];
       index++;
 

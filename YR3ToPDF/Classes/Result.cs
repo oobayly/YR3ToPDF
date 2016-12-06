@@ -35,7 +35,7 @@ namespace YR3ToPDF.Classes {
     /// <summary>
     /// Gets or sets the place of the result.
     /// </summary>
-    public int Place { get; set; }
+    public string Place { get; set; }
 
     /// <summary>
     /// Gets or sets the list of results.
