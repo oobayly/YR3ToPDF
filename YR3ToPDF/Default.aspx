@@ -22,13 +22,12 @@
     }
 
     .content > * {
-      margin: 1ex;
+      margin: 1ex 1ex 0ex 1ex;
       border-bottom: 1px solid #ccc;
       padding-bottom: 1ex;
     }
     .content > *:last-child {
       border-bottom: 0;
-      padding-bottom: 0;
     }
 
     .content form {
