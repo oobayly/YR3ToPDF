@@ -110,15 +110,16 @@ namespace YR3ToPDF.Classes {
         reader.ReadLine(); // Blank
 
         ParseRaces(reader.ReadLine());
-        reader.ReadLine(); // Blank
-
         ParseDiscards(reader.ReadLine());
+        if (Discards > 0)
+          reader.ReadLine(); // Discards clarification
         reader.ReadLine(); // Blank
         reader.ReadLine(); // Places header
         reader.ReadLine(); // Horizontal rule
 
         // Cache the race header line and horizontal rule so we can determine the column widths
         var raceTitles = reader.ReadLine();
+        reader.ReadLine(); // 2nd line of race header
         var widths = GetColumnWidths(reader.ReadLine());
 
         Results = new List<Result>();
@@ -165,7 +166,12 @@ namespace YR3ToPDF.Classes {
       // Line is split by the Shift Out (SO - 0x0e), and terminated by the Device Control 4 (DC4 - 0x14) character
       var parts = line.Split((char)0x0e);
 
-      Date = DateTime.ParseExact(parts[0], "'Printed on 'dd/MM' at 'HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None);
+      try {
+        Date = DateTime.ParseExact(parts[0], "'Printed on 'dd/MM/yyyy' at 'HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None);
+      } catch {
+        Date = DateTime.ParseExact(parts[0], "'Printed on 'dd/MM' at 'HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None);
+      }
+
       Club = parts[1].Split((char)0x14)[0].Trim();
     }
 
